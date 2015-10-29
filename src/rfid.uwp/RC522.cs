@@ -129,7 +129,7 @@ namespace rfid.uwp
             gpioReset.Write(GpioPinValue.Low);
         }
 
-        private async Task InitSpi()
+        private async Task InitSpiAsync()
         {
             var settings = new SpiConnectionSettings(_chipSelectPin);
             settings.Mode = SpiMode.Mode0;
@@ -157,14 +157,14 @@ namespace rfid.uwp
 
         #region API
 
-        public async void InitAll(int chipSelectPin, int resetPowerDownPin, int dataCommandPin)
+        public async Task InitAllAsync(int chipSelectPin, int resetPowerDownPin, int dataCommandPin)
         {
             _chipSelectPin = chipSelectPin;
             _resetPowerDownPin = resetPowerDownPin;
             _dataCommandPin = dataCommandPin;
 
             InitGpio();
-            await InitSpi();
+            await InitSpiAsync();
 
             init();
         }
