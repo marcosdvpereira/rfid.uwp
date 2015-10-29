@@ -106,8 +106,6 @@ namespace rfid.uwp
         private const byte Reserved33 = 0x3E;
         private const byte Reserved34 = 0x3F;
 
-        private byte[] serNum = new byte[5];
-
         private SpiDevice spi;
         private GpioPin gpioReset;
         private GpioPin gpioData;
@@ -156,6 +154,8 @@ namespace rfid.uwp
         }
 
         #region API
+
+        public byte[] serNum = new byte[5];
 
         public async Task InitAllAsync(int chipSelectPin, int resetPowerDownPin, int dataCommandPin)
         {
