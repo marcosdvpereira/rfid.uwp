@@ -5,4 +5,4 @@ Based on RC522 Arduino lib (http://blog.electrodragon.com/rc522-write-a-card-dem
 
 ### Known issues
 
-* cannot convert from 'byte[]' to 'byte*'
+* not tested

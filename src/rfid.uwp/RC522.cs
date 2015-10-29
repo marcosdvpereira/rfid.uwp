@@ -169,22 +169,26 @@ namespace rfid.uwp
             init();
         }
 
-        public bool isCard()
+        public unsafe bool isCard()
         {
             byte status;
             byte[] str = new byte[MAX_LEN];
 
-            status = MFRC522Request(PICC_REQIDL, str);
+            fixed (byte* s = str)
+                status = MFRC522Request(PICC_REQIDL, s);
+
             return (status == MI_OK);
         }
 
-        public bool readCardSerial()
+        public unsafe bool readCardSerial()
         {
 
             byte status;
             byte[] str = new byte[MAX_LEN];
 
-            status = anticoll(str);
+            fixed (byte* s = str)
+                status = anticoll(s);
+
             Array.Copy(serNum, str, 5);
 
             return (status == MI_OK);
@@ -407,7 +411,9 @@ namespace rfid.uwp
             for (i = 0; i < 4; i++)
                 buff[i + 8] = *(serNum + i);
 
-            status = MFRC522ToCard(PCD_AUTHENT, buff, 12, buff, &recvBits);
+            fixed (byte* b = buff)
+                status = MFRC522ToCard(PCD_AUTHENT, b, 12, b, &recvBits);
+
             if ((status != MI_OK) || ((readMFRC522(Status2Reg) & 0x08) == 0))
                 status = MI_ERR;
 
@@ -440,26 +446,29 @@ namespace rfid.uwp
             buff[0] = PICC_WRITE;
             buff[1] = blockAddr;
 
-            fixed (byte* buff2 = &buff[2])
-                calculateCRC(buff, 2, buff2);
-
-            status = MFRC522ToCard(PCD_TRANSCEIVE, buff, 4, buff, &recvBits);
-
-            if ((status != MI_OK) || (recvBits != 4) || ((buff[0] & 0x0F) != 0x0A))
-                status = MI_ERR;
-
-            if (status == MI_OK)
+            fixed (byte* b = buff)
             {
-                for (i = 0; i < 16; i++)
-                    buff[i] = *(writeData + i);
+                fixed (byte* buff2 = &buff[2])
+                    calculateCRC(b, 2, buff2);
 
-                fixed (byte* buff16 = &buff[16])
-                    calculateCRC(buff, 16, buff16);
-
-                status = MFRC522ToCard(PCD_TRANSCEIVE, buff, 18, buff, &recvBits);
+                status = MFRC522ToCard(PCD_TRANSCEIVE, b, 4, b, &recvBits);
 
                 if ((status != MI_OK) || (recvBits != 4) || ((buff[0] & 0x0F) != 0x0A))
                     status = MI_ERR;
+
+                if (status == MI_OK)
+                {
+                    for (i = 0; i < 16; i++)
+                        buff[i] = *(writeData + i);
+
+                    fixed (byte* buff16 = &buff[16])
+                        calculateCRC(b, 16, buff16);
+
+                    status = MFRC522ToCard(PCD_TRANSCEIVE, b, 18, b, &recvBits);
+
+                    if ((status != MI_OK) || (recvBits != 4) || ((buff[0] & 0x0F) != 0x0A))
+                        status = MI_ERR;
+                }
             }
 
             return status;
@@ -479,10 +488,14 @@ namespace rfid.uwp
             for (i = 0; i < 5; i++)
                 buffer[i + 2] = *(serNum + i);
 
-            fixed (byte* buffer7 = &buffer[7])
-                calculateCRC(buffer, 7, buffer7);
+            fixed (byte* b = buffer)
+            {
+                fixed (byte* buffer7 = &buffer[7])
+                    calculateCRC(b, 7, buffer7);
 
-            status = MFRC522ToCard(PCD_TRANSCEIVE, buffer, 9, buffer, &recvBits);
+                status = MFRC522ToCard(PCD_TRANSCEIVE, b, 9, b, &recvBits);
+            }
+
             if ((status == MI_OK) && (recvBits == 0x18))
             {
                 size = buffer[0];
@@ -491,6 +504,7 @@ namespace rfid.uwp
             {
                 size = 0;
             }
+
             return size;
         }
 
@@ -503,10 +517,13 @@ namespace rfid.uwp
             buff[0] = PICC_HALT;
             buff[1] = 0;
 
-            fixed (byte* buff2 = &buff[2])
-                calculateCRC(buff, 2, buff2);
+            fixed (byte* b = buff)
+            {
+                fixed (byte* buff2 = &buff[2])
+                    calculateCRC(b, 2, buff2);
 
-            status = MFRC522ToCard(PCD_TRANSCEIVE, buff, 4, buff, &unLen);
+                status = MFRC522ToCard(PCD_TRANSCEIVE, b, 4, b, &unLen);
+            }
         }
 
         #endregion
