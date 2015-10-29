@@ -113,7 +113,7 @@ namespace rfid.uwp
         private int _chipSelectPin;
         private int _resetPowerDownPin;
         private int _dataCommandPin;
-
+        
         private void InitGpio()
         {
             var ioController = GpioController.GetDefault();
@@ -139,7 +139,7 @@ namespace rfid.uwp
 
         private void init()
         {
-            gpioData.Write(GpioPinValue.High);
+            gpioReset.Write(GpioPinValue.High);
 
             reset();
 
